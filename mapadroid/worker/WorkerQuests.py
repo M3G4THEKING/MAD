@@ -290,7 +290,7 @@ class WorkerQuests(MITMBase):
                                             self.current_location,
                                             11)
             self.logger.debug("Done walking")
-            time.sleep(1)
+            time.sleep(0.3)
             delay_used -= (to_walk / 3.05) - 1.  # We already waited for a bit because of this walking part
             if delay_used < 0:
                 delay_used = 0
@@ -347,7 +347,7 @@ class WorkerQuests(MITMBase):
                     self.logger.error("Worker was killed while sleeping")
                     self._current_sleep_time = 0
                     raise InternalStopWorkerException
-                time.sleep(1)
+                time.sleep(0.5)
 
         self._current_sleep_time = 0
         self.set_devicesettings_value("last_location", self.current_location)
@@ -376,7 +376,7 @@ class WorkerQuests(MITMBase):
             raise InternalStopWorkerException
 
         if self.get_devicesettings_value('rotate_on_lvl_30', False) and \
-                self._mitm_mapper.get_playerlevel(self._origin) >= 30 and self._level_mode:
+                self._mitm_mapper.get_playerlevel(self._origin) >= 40 and self._level_mode:
             # switch if player lvl >= 30
             self.switch_account()
 
@@ -397,7 +397,7 @@ class WorkerQuests(MITMBase):
 
             else:
                 self.logger.debug('Currently in INIT Mode - no Stop processing')
-                time.sleep(5)
+                time.sleep(3)
         finally:
             self.logger.debug("Releasing lock")
             self._work_mutex.release()
@@ -449,10 +449,10 @@ class WorkerQuests(MITMBase):
                      'Remote Raid Pass', 'Battle Pass', 'Premium Battle Pass', 'Premium Battle', 'Sticker')
         x, y = self._resocalc.get_close_main_button_coords(self)
         self._communicator.click(int(x), int(y))
-        time.sleep(1 + int(delayadd))
+        time.sleep(0.2 + int(delayadd))
         x, y = self._resocalc.get_item_menu_coords(self)
         self._communicator.click(int(x), int(y))
-        time.sleep(2 + int(delayadd))
+        time.sleep(0.1 + int(delayadd))
         text_x1, text_x2, _, _ = self._resocalc.get_delete_item_text(self)
         x, y = self._resocalc.get_delete_item_coords(
             self)[0], self._resocalc.get_delete_item_coords(self)[1]
@@ -484,7 +484,7 @@ class WorkerQuests(MITMBase):
                     continue
                 self.logger.info('Found no item to delete. Scrolling down ({} times)', error_counter)
                 self._communicator.touch_and_hold(int(200), int(600), int(200), int(100))
-                time.sleep(5)
+                time.sleep(3)
 
             trashcancheck = self._get_trash_positions()
 
@@ -523,11 +523,11 @@ class WorkerQuests(MITMBase):
                     else:
                         self.logger.info('Going to delete item: {}', item_text)
                         self._communicator.click(int(trashcancheck[trash].x), int(trashcancheck[trash].y))
-                        time.sleep(1 + int(delayadd))
+                        time.sleep(0.5 + int(delayadd))
 
                         self._communicator.touch_and_hold(
                             click_x1, click_y, click_x2, click_y, click_duration)
-                        time.sleep(1)
+                        time.sleep(0.2)
 
                         delx, dely = self._resocalc.get_confirm_delete_item_coords(self)
                         cur_time = time.time()
@@ -558,7 +558,7 @@ class WorkerQuests(MITMBase):
 
         x, y = self._resocalc.get_close_main_button_coords(self)
         self._communicator.click(int(x), int(y))
-        time.sleep(1 + int(delayadd))
+        time.sleep(0.1 + int(delayadd))
         return True
 
     def _update_injection_settings(self):
@@ -719,9 +719,9 @@ class WorkerQuests(MITMBase):
                 x, y = self._resocalc.get_close_main_button_coords(
                     self)[0], self._resocalc.get_close_main_button_coords(self)[1]
                 self._communicator.click(int(x), int(y))
-                time.sleep(3)
-                self._turn_map(self._delay_add)
                 time.sleep(1)
+                self._turn_map(self._delay_add)
+                time.sleep(.1)
             elif data_received == LatestReceivedType.MON:
                 time.sleep(1)
                 self.logger.info('Clicking MON')
