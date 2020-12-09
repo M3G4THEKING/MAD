@@ -615,7 +615,7 @@ class WorkerQuests(MITMBase):
 
         # TODO: can this still happen with the if-clause above?
         if latest is None or PROTO_NUMBER_FOR_GMO not in latest.keys():
-            self.logger.warning("Can't spin stop - no GMO data available!")
+            self.logger.warning("Can't spin pokestop - no GMO data available!")
             self._spinnable_data_failure()
             return False, False
 
@@ -626,7 +626,7 @@ class WorkerQuests(MITMBase):
         stop_found = False
 
         if gmo_cells == list():
-            self.logger.warning("Can't spin stop - no map info in GMO!")
+            self.logger.warning("Can't spin pokestop - no map info in GMO!")
             self._spinnable_data_failure()
             return False, False
         for cell in gmo_cells:
@@ -651,26 +651,26 @@ class WorkerQuests(MITMBase):
                 fort_type: int = fort.get("type", 0)
                 if fort_type == 0:
                     self._db_wrapper.delete_stop(latitude, longitude)
-                    self.logger.warning("Tried to open a stop but found a gym instead!")
+                    self.logger.warning("Tried to open a pokestop but found a gym instead!")
                     self._spinnable_data_failcount = 0
                     return False, True
 
                 visited: bool = fort.get("visited", False)
                 if self._level_mode and self._ignore_spinned_stops and visited:
-                    self.logger.info("Level mode: Stop already visited - skipping it")
+                    self.logger.info("Level mode: Pokestop already visited - skipping it")
                     self._db_wrapper.submit_pokestop_visited(self._origin, latitude, longitude)
                     self._spinnable_data_failcount = 0
                     return False, True
 
                 enabled: bool = fort.get("enabled", True)
                 if not enabled:
-                    self.logger.warning("Can't spin the stop - it is disabled")
+                    self.logger.warning("Can't spin the pokestop - it is disabled")
                 closed: bool = fort.get("closed", False)
                 if closed:
-                    self.logger.warning("Can't spin the stop - it is closed")
+                    self.logger.warning("Can't spin the pokestop - it is closed")
                 cooldown: int = fort.get("cooldown_complete_ms", 0)
                 if not cooldown == 0:
-                    self.logger.warning("Can't spin the stop - it has cooldown")
+                    self.logger.warning("Can't spin the pokestop - it has cooldown")
                 self._spinnable_data_failcount = 0
                 return fort_type == 1 and enabled and not closed and cooldown == 0, False
         # by now we should've found the stop in the GMO
@@ -715,11 +715,11 @@ class WorkerQuests(MITMBase):
                 timestamp=self._stop_process_time, proto_to_wait_for=104, timeout=15)
             if data_received == LatestReceivedType.GYM:
                 self.logger.info('Clicking GYM')
-                time.sleep(10)
+                time.sleep(2)
                 x, y = self._resocalc.get_close_main_button_coords(
                     self)[0], self._resocalc.get_close_main_button_coords(self)[1]
                 self._communicator.click(int(x), int(y))
-                time.sleep(1)
+                time.sleep(.1)
                 self._turn_map(self._delay_add)
                 time.sleep(.1)
             elif data_received == LatestReceivedType.MON:
@@ -727,7 +727,7 @@ class WorkerQuests(MITMBase):
                 self.logger.info('Clicking MON')
                 time.sleep(.5)
                 self._turn_map(self._delay_add)
-                time.sleep(1)
+                time.sleep(.1)
             elif data_received == LatestReceivedType.UNDEFINED:
                 self.logger.info('Getting timeout - or other unknown error. Try again')
                 if not self._check_pogo_button():
@@ -735,7 +735,7 @@ class WorkerQuests(MITMBase):
 
             to += 1
             if to > 2:
-                self.logger.warning("Giving up on this stop after 3 failures in open_pokestop loop")
+                self.logger.warning("Giving up on this pokestop after 3 failures in open_pokestop loop")
         return data_received
 
     # TODO: handle https://github.com/Furtif/POGOProtos/blob/master/src/POGOProtos/Networking/Responses
@@ -753,7 +753,7 @@ class WorkerQuests(MITMBase):
             if data_received == FortSearchResultTypes.INVENTORY:
                 self.logger.info('Box is full... clear out items!')
                 self.clear_thread_task = ClearThreadTasks.BOX
-                time.sleep(5)
+                time.sleep(3)
                 if not self._mapping_manager.routemanager_redo_stop(self._routemanager_name, self._origin,
                                                                     self.current_location.lat,
                                                                     self.current_location.lng):
@@ -771,8 +771,8 @@ class WorkerQuests(MITMBase):
                     break
 
                 if data_received == FortSearchResultTypes.COOLDOWN:
-                    self.logger.info('Stop is on cooldown.. sleeping 10 seconds but probably should just move on')
-                    time.sleep(10)
+                    self.logger.info('Stop is on cooldown.. sleeping 5 seconds but probably should just move on')
+                    time.sleep(5)
                     if self._db_wrapper.check_stop_quest(self.current_location.lat,
                                                          self.current_location.lng):
                         self.logger.info('Quest is done without us noticing. Getting new Quest...')
@@ -824,7 +824,7 @@ class WorkerQuests(MITMBase):
                 break
             else:
                 if data_received == LatestReceivedType.MON:
-                    self.logger.info("Got MON data after opening stop. This does not make sense - just retry...")
+                    self.logger.info("Got Pokemon data after opening pokestop. This does not make sense - just retry...")
                 else:
                     self.logger.info("Brief speed lock or we already spun it, trying again")
                 if to > 2 and self._db_wrapper.check_stop_quest(self.current_location.lat,
@@ -835,7 +835,7 @@ class WorkerQuests(MITMBase):
                     break
                 elif to > 2 and self._level_mode and self._mitm_mapper.get_poke_stop_visits(
                         self._origin) > 6800:
-                    self.logger.warning("Might have hit a spin limit for worker! We have spun: {} stops",
+                    self.logger.warning("Might have hit the spin limit for worker! We have spun: {} stops",
                                         self._mitm_mapper.get_poke_stop_visits(self._origin))
 
                 self._turn_map(self._delay_add)
@@ -936,7 +936,7 @@ class WorkerQuests(MITMBase):
     def _spinnable_data_failure(self):
         if self._spinnable_data_failcount > 9:
             self._spinnable_data_failcount = 0
-            self.logger.warning("Worker failed spinning stop with GMO/data issues 10+ times - restart pogo")
+            self.logger.warning("Worker failed spinning pokestop with GMO/data issues 10+ times - restart pokemon Go!!!")
             if not self._restart_pogo(mitm_mapper=self._mitm_mapper):
                 # TODO: put in loop, count up for a reboot ;)
                 raise InternalStopWorkerException
