@@ -1,7 +1,7 @@
 ############################
 # MAD
 ############################
-FROM python:3.11-slim AS mad-core
+FROM python:3.13-rc-slim AS mad-core
 # Working directory for the application
 WORKDIR /usr/src/app
 
