@@ -19,7 +19,7 @@ gpxdata==1.2.1
 grpcio==1.56.2
 ImageHash==4.3.1
 imutils==0.5.4
-Jinja2==3.1.2
+Jinja2==3.1.4
 loguru==0.7.0
 matplotlib==3.7.2
 msgpack==1.0.5
