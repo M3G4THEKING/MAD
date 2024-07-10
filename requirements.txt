@@ -51,3 +51,4 @@ marshmallow-enum==1.5.1
 typeguard==4.0.0
 redis==4.6.0
 hiredis==2.2.3
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
